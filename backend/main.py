@@ -73,6 +73,11 @@ firebase_auth = pyrebase.initialize_app(firebaseConfig)
 auth = firebase_auth.auth()
 
 cred_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "serviceAccountKey.json")
+fallback_cred_path = "/etc/secrets/serviceAccountKey.json"
+
+if not os.path.exists(cred_path) and os.path.exists(fallback_cred_path):
+    cred_path = fallback_cred_path
+
 if not firebase_admin._apps:
     try:
         cred = credentials.Certificate(cred_path)
@@ -80,15 +85,20 @@ if not firebase_admin._apps:
             'storageBucket': 'akademikagent.firebasestorage.app'
         })
     except Exception as e:
-        print(f"Error init Firebase Admin: {e}")
+        print(f"Error init Firebase Admin: {e}", flush=True)
 
 try:
-    db = firestore.client()
-    bucket = storage.bucket()
+    if firebase_admin._apps:
+        db = firestore.client()
+        bucket = storage.bucket()
+    else:
+        db = None
+        bucket = None
+        print("Firebase Admin _apps not found, skipping firestore client init.", flush=True)
 except Exception as e:
     db = None
     bucket = None
-    print(f"Firestore Client err: {e}")
+    print(f"Firestore Client err: {e}", flush=True)
 
 
 # --- MODELS ---
