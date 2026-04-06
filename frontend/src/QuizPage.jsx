@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Bookmark } from "lucide-react";
 
-const API = "http://localhost:8000";
+const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export default function QuizPage({ user, username, selectedDocs }) {
     const [quiz, setQuiz] = useState([]);

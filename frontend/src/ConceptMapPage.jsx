@@ -3,7 +3,7 @@ import axios from "axios";
 import { Network } from "vis-network";
 import { DataSet } from "vis-data";
 
-const API = "http://localhost:8000";
+const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 const NODE_COLORS = [
     { background: "#4ecdc4", border: "#2aa39b", highlight: { background: "#6eddd6", border: "#2aa39b" } },

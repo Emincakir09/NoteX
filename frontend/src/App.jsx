@@ -11,7 +11,7 @@ import DiscoverPage from "./DiscoverPage";
 import NotebookPage from "./NotebookPage";
 import "./index.css";
 
-const API = "http://localhost:8000";
+const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 // ── Pomodoro (Advanced UI) ──
 function PomodoroDisplay({ timeLeft, running, start, pause, reset, setTime }) {

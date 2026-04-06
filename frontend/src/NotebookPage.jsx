@@ -3,7 +3,7 @@ import axios from "axios";
 import { Plus, Trash2, Edit3, BookOpen, Clock, Loader2, Book, ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
 import "./Notebook.css"; 
 
-const API = "http://localhost:8000";
+const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export default function NotebookPage({ user }) {
   const [notes, setNotes] = useState([]);

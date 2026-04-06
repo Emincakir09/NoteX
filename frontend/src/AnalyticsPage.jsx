@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Bookmark, ChevronDown, ChevronUp, Trash2, Globe } from "lucide-react";
 
-const API = "http://localhost:8000";
+const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export default function AnalyticsPage({ user, username, initialTab }) {
     const [history, setHistory] = useState([]);

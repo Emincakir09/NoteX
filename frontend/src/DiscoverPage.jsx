@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Heart, MessageCircle, Bookmark, Send, User, Trash2, RefreshCw, Clock } from "lucide-react";
 
-const API = "http://localhost:8000";
+const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export default function DiscoverPage({ user, username }) {
     const [feed, setFeed] = useState([]);
