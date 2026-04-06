@@ -22,3 +22,8 @@ fpdf2
 python-docx
 youtube-transcript-api
 yt-dlp
+
+fastapi
+uvicorn
+pydantic
+python-multipart
