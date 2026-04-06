@@ -1,0 +1,127 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 600px;
+                 background-color: #222222;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#4ecdc4", "font": {"color": "white"}, "id": "RGB G\u00f6r\u00fcnt\u00fc", "label": "RGB G\u00f6r\u00fcnt\u00fc", "shape": "dot", "title": "RGB G\u00f6r\u00fcnt\u00fc"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "Gri Seviye G\u00f6r\u00fcnt\u00fc", "label": "Gri Seviye G\u00f6r\u00fcnt\u00fc", "shape": "dot", "title": "Gri Seviye G\u00f6r\u00fcnt\u00fc"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "\u0130kili (Binary) G\u00f6r\u00fcnt\u00fc", "label": "\u0130kili (Binary) G\u00f6r\u00fcnt\u00fc", "shape": "dot", "title": "\u0130kili (Binary) G\u00f6r\u00fcnt\u00fc"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "Ortalama De\u011fer Y\u00f6ntemi", "label": "Ortalama De\u011fer Y\u00f6ntemi", "shape": "dot", "title": "Ortalama De\u011fer Y\u00f6ntemi"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "RGB Kanallar\u0131", "label": "RGB Kanallar\u0131", "shape": "dot", "title": "RGB Kanallar\u0131"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "Luma Algoritmas\u0131", "label": "Luma Algoritmas\u0131", "shape": "dot", "title": "Luma Algoritmas\u0131"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "\u0130nsan G\u00f6rsel Alg\u0131s\u0131", "label": "\u0130nsan G\u00f6rsel Alg\u0131s\u0131", "shape": "dot", "title": "\u0130nsan G\u00f6rsel Alg\u0131s\u0131"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "Ye\u015fil Kanal\u0131", "label": "Ye\u015fil Kanal\u0131", "shape": "dot", "title": "Ye\u015fil Kanal\u0131"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "A\u00e7\u0131kl\u0131k (Lightness) Y\u00f6ntemi", "label": "A\u00e7\u0131kl\u0131k (Lightness) Y\u00f6ntemi", "shape": "dot", "title": "A\u00e7\u0131kl\u0131k (Lightness) Y\u00f6ntemi"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "RGB De\u011ferleri", "label": "RGB De\u011ferleri", "shape": "dot", "title": "RGB De\u011ferleri"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "Renk Kanal\u0131 Y\u00f6ntemi", "label": "Renk Kanal\u0131 Y\u00f6ntemi", "shape": "dot", "title": "Renk Kanal\u0131 Y\u00f6ntemi"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "Dijital Kameralar", "label": "Dijital Kameralar", "shape": "dot", "title": "Dijital Kameralar"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "E\u015fikleme (Thresholding)", "label": "E\u015fikleme (Thresholding)", "shape": "dot", "title": "E\u015fikleme (Thresholding)"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "Nesne Ay\u0131rma", "label": "Nesne Ay\u0131rma", "shape": "dot", "title": "Nesne Ay\u0131rma"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "Kaynak T\u00fcketimi", "label": "Kaynak T\u00fcketimi", "shape": "dot", "title": "Kaynak T\u00fcketimi"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "Otsu E\u015fikleme", "label": "Otsu E\u015fikleme", "shape": "dot", "title": "Otsu E\u015fikleme"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "S\u0131n\u0131flar Aras\u0131 Varyans", "label": "S\u0131n\u0131flar Aras\u0131 Varyans", "shape": "dot", "title": "S\u0131n\u0131flar Aras\u0131 Varyans"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "Otomatik Sistemler", "label": "Otomatik Sistemler", "shape": "dot", "title": "Otomatik Sistemler"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "Intermodes E\u015fikleme", "label": "Intermodes E\u015fikleme", "shape": "dot", "title": "Intermodes E\u015fikleme"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "Bimodal Histogram", "label": "Bimodal Histogram", "shape": "dot", "title": "Bimodal Histogram"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "K\u00fcresel (Global) E\u015fikleme", "label": "K\u00fcresel (Global) E\u015fikleme", "shape": "dot", "title": "K\u00fcresel (Global) E\u015fikleme"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "E\u015fik De\u011feri", "label": "E\u015fik De\u011feri", "shape": "dot", "title": "E\u015fik De\u011feri"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "Yerel (Local) E\u015fikleme", "label": "Yerel (Local) E\u015fikleme", "shape": "dot", "title": "Yerel (Local) E\u015fikleme"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "\u0130ki G\u00f6r\u00fcnt\u00fc Operasyonlar\u0131", "label": "\u0130ki G\u00f6r\u00fcnt\u00fc Operasyonlar\u0131", "shape": "dot", "title": "\u0130ki G\u00f6r\u00fcnt\u00fc Operasyonlar\u0131"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "G\u00f6r\u00fcnt\u00fc Boyutu", "label": "G\u00f6r\u00fcnt\u00fc Boyutu", "shape": "dot", "title": "G\u00f6r\u00fcnt\u00fc Boyutu"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "Toplama Operasyonu", "label": "Toplama Operasyonu", "shape": "dot", "title": "Toplama Operasyonu"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "Piksel De\u011ferleri", "label": "Piksel De\u011ferleri", "shape": "dot", "title": "Piksel De\u011ferleri"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "\u00c7\u0131karma Operasyonu", "label": "\u00c7\u0131karma Operasyonu", "shape": "dot", "title": "\u00c7\u0131karma Operasyonu"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "Kesi\u015fim (Intersection)", "label": "Kesi\u015fim (Intersection)", "shape": "dot", "title": "Kesi\u015fim (Intersection)"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "Minimum Piksel De\u011feri", "label": "Minimum Piksel De\u011feri", "shape": "dot", "title": "Minimum Piksel De\u011feri"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "Birle\u015ftirme (Merge)", "label": "Birle\u015ftirme (Merge)", "shape": "dot", "title": "Birle\u015ftirme (Merge)"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "Maksimum Piksel De\u011feri", "label": "Maksimum Piksel De\u011feri", "shape": "dot", "title": "Maksimum Piksel De\u011feri"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "Fark (Difference) Operasyonu", "label": "Fark (Difference) Operasyonu", "shape": "dot", "title": "Fark (Difference) Operasyonu"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "Mutlak De\u011fer", "label": "Mutlak De\u011fer", "shape": "dot", "title": "Mutlak De\u011fer"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "BT-709 Algoritmas\u0131", "label": "BT-709 Algoritmas\u0131", "shape": "dot", "title": "BT-709 Algoritmas\u0131"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "Gri Seviye D\u00f6n\u00fc\u015f\u00fcm\u00fc", "label": "Gri Seviye D\u00f6n\u00fc\u015f\u00fcm\u00fc", "shape": "dot", "title": "Gri Seviye D\u00f6n\u00fc\u015f\u00fcm\u00fc"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "Histogram Analizi", "label": "Histogram Analizi", "shape": "dot", "title": "Histogram Analizi"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "Sauvola Y\u00f6ntemi", "label": "Sauvola Y\u00f6ntemi", "shape": "dot", "title": "Sauvola Y\u00f6ntemi"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "Adaptif E\u015fikleme", "label": "Adaptif E\u015fikleme", "shape": "dot", "title": "Adaptif E\u015fikleme"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "K-means", "label": "K-means", "shape": "dot", "title": "K-means"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "K\u00fcmeleme Tabanl\u0131 E\u015fikleme", "label": "K\u00fcmeleme Tabanl\u0131 E\u015fikleme", "shape": "dot", "title": "K\u00fcmeleme Tabanl\u0131 E\u015fikleme"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "Bellek Kullan\u0131m\u0131", "label": "Bellek Kullan\u0131m\u0131", "shape": "dot", "title": "Bellek Kullan\u0131m\u0131"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "OpenCV", "label": "OpenCV", "shape": "dot", "title": "OpenCV"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "Luminosity Y\u00f6ntemi", "label": "Luminosity Y\u00f6ntemi", "shape": "dot", "title": "Luminosity Y\u00f6ntemi"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "MATLAB", "label": "MATLAB", "shape": "dot", "title": "MATLAB"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "S\u0131n\u0131f Olas\u0131l\u0131\u011f\u0131 (w)", "label": "S\u0131n\u0131f Olas\u0131l\u0131\u011f\u0131 (w)", "shape": "dot", "title": "S\u0131n\u0131f Olas\u0131l\u0131\u011f\u0131 (w)"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "Hareketli Ortalama Filtresi", "label": "Hareketli Ortalama Filtresi", "shape": "dot", "title": "Hareketli Ortalama Filtresi"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "Histogram D\u00fczeltme", "label": "Histogram D\u00fczeltme", "shape": "dot", "title": "Histogram D\u00fczeltme"}, {"color": "#4ecdc4", "font": {"color": "white"}, "id": "Fark Operasyonu", "label": "Fark Operasyonu", "shape": "dot", "title": "Fark Operasyonu"}, {"color": "#ff6b6b", "font": {"color": "white"}, "id": "7 Fark Oyunu", "label": "7 Fark Oyunu", "shape": "dot", "title": "7 Fark Oyunu"}]);
+                  edges = new vis.DataSet([{"from": "RGB G\u00f6r\u00fcnt\u00fc", "label": "d\u00f6n\u00fc\u015ft\u00fcr\u00fcl\u00fcr", "title": "d\u00f6n\u00fc\u015ft\u00fcr\u00fcl\u00fcr", "to": "Gri Seviye G\u00f6r\u00fcnt\u00fc"}, {"from": "Gri Seviye G\u00f6r\u00fcnt\u00fc", "label": "e\u015fikleme ile d\u00f6n\u00fc\u015ft\u00fcr\u00fcl\u00fcr", "title": "e\u015fikleme ile d\u00f6n\u00fc\u015ft\u00fcr\u00fcl\u00fcr", "to": "\u0130kili (Binary) G\u00f6r\u00fcnt\u00fc"}, {"from": "Ortalama De\u011fer Y\u00f6ntemi", "label": "kanallar\u0131n aritmetik ortalamas\u0131n\u0131 al\u0131r", "title": "kanallar\u0131n aritmetik ortalamas\u0131n\u0131 al\u0131r", "to": "RGB Kanallar\u0131"}, {"from": "Luma Algoritmas\u0131", "label": "temel al\u0131narak a\u011f\u0131rl\u0131kl\u0131 ortalama hesaplar", "title": "temel al\u0131narak a\u011f\u0131rl\u0131kl\u0131 ortalama hesaplar", "to": "\u0130nsan G\u00f6rsel Alg\u0131s\u0131"}, {"from": "Luma Algoritmas\u0131", "label": "en y\u00fcksek a\u011f\u0131rl\u0131\u011f\u0131 verir", "title": "en y\u00fcksek a\u011f\u0131rl\u0131\u011f\u0131 verir", "to": "Ye\u015fil Kanal\u0131"}, {"from": "A\u00e7\u0131kl\u0131k (Lightness) Y\u00f6ntemi", "label": "en b\u00fcy\u00fck ve en k\u00fc\u00e7\u00fck de\u011ferlerin ortalamas\u0131n\u0131 al\u0131r", "title": "en b\u00fcy\u00fck ve en k\u00fc\u00e7\u00fck de\u011ferlerin ortalamas\u0131n\u0131 al\u0131r", "to": "RGB De\u011ferleri"}, {"from": "Renk Kanal\u0131 Y\u00f6ntemi", "label": "genellikle bu y\u00f6ntemi kullan\u0131r", "title": "genellikle bu y\u00f6ntemi kullan\u0131r", "to": "Dijital Kameralar"}, {"from": "E\u015fikleme (Thresholding)", "label": "\u00f6n plan nesnelerini arka plandan ay\u0131r\u0131r", "title": "\u00f6n plan nesnelerini arka plandan ay\u0131r\u0131r", "to": "Nesne Ay\u0131rma"}, {"from": "E\u015fikleme (Thresholding)", "label": "bellek ve CPU kullan\u0131m\u0131n\u0131 azalt\u0131r", "title": "bellek ve CPU kullan\u0131m\u0131n\u0131 azalt\u0131r", "to": "Kaynak T\u00fcketimi"}, {"from": "Otsu E\u015fikleme", "label": "varyans\u0131 maksimize ederek e\u015fik de\u011ferini belirler", "title": "varyans\u0131 maksimize ederek e\u015fik de\u011ferini belirler", "to": "S\u0131n\u0131flar Aras\u0131 Varyans"}, {"from": "Otsu E\u015fikleme", "label": "e\u015fik de\u011ferini otomatik belirlemek i\u00e7in kullan\u0131l\u0131r", "title": "e\u015fik de\u011ferini otomatik belirlemek i\u00e7in kullan\u0131l\u0131r", "to": "Otomatik Sistemler"}, {"from": "Intermodes E\u015fikleme", "label": "iki belirgin tepe noktas\u0131 olan histogramlar\u0131 temel al\u0131r", "title": "iki belirgin tepe noktas\u0131 olan histogramlar\u0131 temel al\u0131r", "to": "Bimodal Histogram"}, {"from": "K\u00fcresel (Global) E\u015fikleme", "label": "t\u00fcm g\u00f6r\u00fcnt\u00fc i\u00e7in tek bir de\u011fer kullan\u0131r", "title": "t\u00fcm g\u00f6r\u00fcnt\u00fc i\u00e7in tek bir de\u011fer kullan\u0131r", "to": "E\u015fik De\u011feri"}, {"from": "Yerel (Local) E\u015fikleme", "label": "farkl\u0131 b\u00f6lgeler i\u00e7in de\u011fi\u015fken de\u011ferler kullan\u0131r", "title": "farkl\u0131 b\u00f6lgeler i\u00e7in de\u011fi\u015fken de\u011ferler kullan\u0131r", "to": "E\u015fik De\u011feri"}, {"from": "\u0130ki G\u00f6r\u00fcnt\u00fc Operasyonlar\u0131", "label": "g\u00f6r\u00fcnt\u00fclerin ayn\u0131 boyutta olmas\u0131n\u0131 gerektirir", "title": "g\u00f6r\u00fcnt\u00fclerin ayn\u0131 boyutta olmas\u0131n\u0131 gerektirir", "to": "G\u00f6r\u00fcnt\u00fc Boyutu"}, {"from": "Toplama Operasyonu", "label": "kar\u015f\u0131l\u0131kl\u0131 pikselleri toplar", "title": "kar\u015f\u0131l\u0131kl\u0131 pikselleri toplar", "to": "Piksel De\u011ferleri"}, {"from": "\u00c7\u0131karma Operasyonu", "label": "kar\u015f\u0131l\u0131kl\u0131 pikselleri birbirinden \u00e7\u0131kar\u0131r", "title": "kar\u015f\u0131l\u0131kl\u0131 pikselleri birbirinden \u00e7\u0131kar\u0131r", "to": "Piksel De\u011ferleri"}, {"from": "Kesi\u015fim (Intersection)", "label": "kar\u015f\u0131la\u015ft\u0131r\u0131lan piksellerden k\u00fc\u00e7\u00fck olan\u0131 al\u0131r", "title": "kar\u015f\u0131la\u015ft\u0131r\u0131lan piksellerden k\u00fc\u00e7\u00fck olan\u0131 al\u0131r", "to": "Minimum Piksel De\u011feri"}, {"from": "Birle\u015ftirme (Merge)", "label": "kar\u015f\u0131la\u015ft\u0131r\u0131lan piksellerden b\u00fcy\u00fck olan\u0131 al\u0131r", "title": "kar\u015f\u0131la\u015ft\u0131r\u0131lan piksellerden b\u00fcy\u00fck olan\u0131 al\u0131r", "to": "Maksimum Piksel De\u011feri"}, {"from": "Fark (Difference) Operasyonu", "label": "\u00e7\u0131karma i\u015fleminin mutlak sonucunu al\u0131r", "title": "\u00e7\u0131karma i\u015fleminin mutlak sonucunu al\u0131r", "to": "Mutlak De\u011fer"}, {"from": "BT-709 Algoritmas\u0131", "label": "bir d\u00f6n\u00fc\u015f\u00fcm y\u00f6ntemidir", "title": "bir d\u00f6n\u00fc\u015f\u00fcm y\u00f6ntemidir", "to": "Gri Seviye D\u00f6n\u00fc\u015f\u00fcm\u00fc"}, {"from": "Histogram Analizi", "label": "e\u015fik de\u011ferini bulmak i\u00e7in kullan\u0131l\u0131r", "title": "e\u015fik de\u011ferini bulmak i\u00e7in kullan\u0131l\u0131r", "to": "Intermodes E\u015fikleme"}, {"from": "Sauvola Y\u00f6ntemi", "label": "bir t\u00fcr yerel e\u015fikleme y\u00f6ntemidir", "title": "bir t\u00fcr yerel e\u015fikleme y\u00f6ntemidir", "to": "Adaptif E\u015fikleme"}, {"from": "K-means", "label": "e\u015fikleme i\u00e7in kullan\u0131lan hibrit bir y\u00f6ntemdir", "title": "e\u015fikleme i\u00e7in kullan\u0131lan hibrit bir y\u00f6ntemdir", "to": "K\u00fcmeleme Tabanl\u0131 E\u015fikleme"}, {"from": "\u0130kili (Binary) G\u00f6r\u00fcnt\u00fc", "label": "RGB g\u00f6r\u00fcnt\u00fcye g\u00f6re \u00e7ok daha az yer kaplar", "title": "RGB g\u00f6r\u00fcnt\u00fcye g\u00f6re \u00e7ok daha az yer kaplar", "to": "Bellek Kullan\u0131m\u0131"}, {"from": "OpenCV", "label": "varsay\u0131lan gri seviye d\u00f6n\u00fc\u015f\u00fcm\u00fc olarak kullan\u0131r", "title": "varsay\u0131lan gri seviye d\u00f6n\u00fc\u015f\u00fcm\u00fc olarak kullan\u0131r", "to": "Luminosity Y\u00f6ntemi"}, {"from": "MATLAB", "label": "varsay\u0131lan gri seviye d\u00f6n\u00fc\u015f\u00fcm\u00fc olarak kullan\u0131r", "title": "varsay\u0131lan gri seviye d\u00f6n\u00fc\u015f\u00fcm\u00fc olarak kullan\u0131r", "to": "Luminosity Y\u00f6ntemi"}, {"from": "S\u0131n\u0131f Olas\u0131l\u0131\u011f\u0131 (w)", "label": "hesaplama form\u00fcl\u00fcn\u00fcn bir par\u00e7as\u0131d\u0131r", "title": "hesaplama form\u00fcl\u00fcn\u00fcn bir par\u00e7as\u0131d\u0131r", "to": "Otsu E\u015fikleme"}, {"from": "Hareketli Ortalama Filtresi", "label": "Intermodes y\u00f6nteminde histogram\u0131 p\u00fcr\u00fczs\u00fczle\u015ftirmek i\u00e7in kullan\u0131l\u0131r", "title": "Intermodes y\u00f6nteminde histogram\u0131 p\u00fcr\u00fczs\u00fczle\u015ftirmek i\u00e7in kullan\u0131l\u0131r", "to": "Histogram D\u00fczeltme"}, {"from": "Fark Operasyonu", "label": "g\u00f6r\u00fcnt\u00fcler aras\u0131ndaki farklar\u0131 bulmak i\u00e7in uygulan\u0131r", "title": "g\u00f6r\u00fcnt\u00fcler aras\u0131ndaki farklar\u0131 bulmak i\u00e7in uygulan\u0131r", "to": "7 Fark Oyunu"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"nodes": {"font": {"size": 24, "color": "white", "face": "tahoma"}, "shape": "dot", "size": 30}, "edges": {"width": 2, "color": {"color": "#aaaaaa", "highlight": "#ffffff"}, "font": {"size": 18, "align": "middle", "color": "white", "strokeWidth": 2, "strokeColor": "black"}}, "physics": {"forceAtlas2Based": {"gravitationalConstant": -100, "centralGravity": 0.005, "springLength": 200, "springConstant": 0.05, "avoidOverlap": 1}, "minVelocity": 0.75, "solver": "forceAtlas2Based", "stabilization": {"enabled": true, "iterations": 1000}}, "interaction": {"navigationButtons": true, "keyboard": true}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

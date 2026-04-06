@@ -1,0 +1,107 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&display=swap');
+
+/* Notebook CSS */
+.spiral-notebook {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  height: 100%;
+  background: transparent;
+  display: flex;
+  margin-left: 20px;
+  filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.15));
+}
+
+/* The actual paper page */
+.notebook-page {
+  flex: 1;
+  background-color: #fcfcf0;
+  border-radius: 4px 12px 12px 4px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-left: 50px; /* Space for the rings */
+}
+
+/* Red margin line */
+.notebook-page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 65px;
+  width: 2px;
+  background-color: rgba(239, 68, 68, 0.4);
+  z-index: 1;
+}
+
+/* Blue ruled lines */
+.notebook-lines-container {
+  flex: 1;
+  position: relative;
+  /* 32px is the line height */
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 31px,
+    rgba(56, 189, 248, 0.3) 31px,
+    rgba(56, 189, 248, 0.3) 32px
+  );
+  background-attachment: local;
+  z-index: 2;
+}
+
+.notebook-header {
+  padding: 24px 20px 16px 30px;
+  z-index: 2;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-bottom: 2px solid rgba(56, 189, 248, 0.3);
+}
+
+.notebook-header h2 {
+  font-family: 'Caveat', cursive;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.notebook-textarea {
+  width: 100%;
+  height: 100%;
+  padding: 4px 20px 24px 30px;
+  border: none;
+  background: transparent;
+  resize: none;
+  outline: none;
+  font-family: 'Caveat', cursive;
+  font-size: 1.5rem;
+  line-height: 32px;
+  color: #1F2937;
+}
+
+/* Spiral Binding */
+.spiral-binding-container {
+  position: absolute;
+  top: 20px;
+  bottom: 20px;
+  left: -12px;
+  width: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 5;
+}
+
+.spiral-ring {
+  width: 32px;
+  height: 12px;
+  background: linear-gradient(to right, #9CA3AF 0%, #D1D5DB 20%, #E5E7EB 50%, #D1D5DB 80%, #9CA3AF 100%);
+  border-radius: 6px;
+  border: 1px solid #6B7280;
+  box-shadow: inset 0 -2px 4px rgba(0,0,0,0.2), 2px 2px 5px rgba(0,0,0,0.3);
+}

@@ -1,0 +1,59 @@
+
+> frontend@0.0.0 dev
+> vite --host 0.0.0.0
+
+[2m19:17:08[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because vite config has changed
+
+  [32m[1mVITE[22m v8.0.3[39m  [2mready in [0m[1m493[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.1.148:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://172.19.48.1:[1m5173[22m/[39m
+[2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
+[2m19:30:52[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx[22m
+[2m19:32:52[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx[22m
+[2m19:35:15[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx[22m
+[2m19:36:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx[22m
+[2m19:37:14[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx[22m
+[2m19:56:41[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/auth.css[22m
+[2m19:56:43[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/AuthPage.jsx[22m
+[2m19:57:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx[22m
+[2m19:57:23[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/AuthPage.jsx[22m
+[2m19:57:23[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/auth.css[22m
+[2m19:57:23[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx[22m
+[2m19:57:23[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mindex.html[22m
+[2m19:59:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx[22m
+[2m19:59:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/AuthPage.jsx[22m
+[2m19:59:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mindex.html[22m
+[2m20:25:58[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/auth.css[22m
+[2m20:26:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/auth.css[22m
+[2m20:28:36[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/auth.css[22m
+[2m20:29:14[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/auth.css[22m
+[2m20:45:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx[22m
+[2m20:50:39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx[22m
+[2m20:50:41[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/AuthPage.jsx[22m
+[2m20:51:14[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/AuthPage.jsx[22m
+[2m20:55:41[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mindex.html[22m
+[2m21:07:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx[22m
+[2m21:07:53[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled error] [1mReferenceError[22m: timeLeft is not defined
+[39m > App src/App.jsx:405:37
+ > Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:19
+ > renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:21
+ > updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:18
+ > beginWork node_modules/react-dom/cjs/react-dom-client.development.js:11778:17
+ > runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:871:29
+ > performUnitOfWork node_modules/react-dom/cjs/react-dom-client.development.js:17641:21
+ > workLoopSync node_modules/react-dom/cjs/react-dom-client.development.js:17469:40
+ > renderRootSync node_modules/react-dom/cjs/react-dom-client.development.js:17450:10
+ > performWorkOnRoot node_modules/react-dom/cjs/react-dom-client.development.js:16583:34
+
+[2m21:07:53[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22mAn error occurred in the <App> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+[2m21:08:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx[22m
+[2m21:14:35[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/NotebookPage.jsx[22m
+[2m09:06:52[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx[22m
+[2m09:08:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/NotebookPage.jsx[22m
+[2m09:10:22[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/NotebookPage.jsx[22m
