@@ -37,8 +37,6 @@ import PyPDF2
 # Add parent dir to path so we can import lib
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from lib.rag_service import RAGService
-
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
 
 # --- YAPAY ZEKA AYARLARI ---
@@ -185,6 +183,7 @@ def get_avatar(email: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 def get_rag_service(email: str):
+    from lib.rag_service import RAGService
     parent = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     # RAG veritabanı Streamlit ile aynı konumda (chroma_db klasörü değil faiss_index)
     user_db_path = os.path.join(parent, "faiss_index", email.replace('@', '_').replace('.', '_'))
