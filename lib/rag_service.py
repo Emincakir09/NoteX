@@ -14,29 +14,33 @@ import google.generativeai as genai
 class GeminiEmbeddings(Embeddings):
     """google-generativeai SDK ile direkt Gemini embeddings (v1beta sorununu atlar)."""
 
-    def __init__(self, api_key: str = None, model: str = "models/text-embedding-004"):
-        effective_key = api_key or os.getenv("GOOGLE_API_KEY", "")
-        genai.configure(api_key=effective_key)
+    def __init__(self, api_key: str = None, model: str = "text-embedding-004"):
+        self.api_key = api_key or os.getenv("GOOGLE_API_KEY", "")
         self.model = model
+        self.base_url = f"https://generativelanguage.googleapis.com/v1/models/{model}:embedContent"
+
+    def _embed(self, text: str, task_type: str = "RETRIEVAL_DOCUMENT") -> List[float]:
+        import urllib.request
+        payload = json.dumps({
+            "model": f"models/{self.model}",
+            "content": {"parts": [{"text": text}]},
+            "taskType": task_type
+        }).encode("utf-8")
+        req = urllib.request.Request(
+            f"{self.base_url}?key={self.api_key}",
+            data=payload,
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
+        with urllib.request.urlopen(req) as resp:
+            data = json.loads(resp.read())
+        return data["embedding"]["values"]
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        embeddings = []
-        for text in texts:
-            result = genai.embed_content(
-                model=self.model,
-                content=text,
-                task_type="retrieval_document"
-            )
-            embeddings.append(result["embedding"])
-        return embeddings
+        return [self._embed(t, "RETRIEVAL_DOCUMENT") for t in texts]
 
     def embed_query(self, text: str) -> List[float]:
-        result = genai.embed_content(
-            model=self.model,
-            content=text,
-            task_type="retrieval_query"
-        )
-        return result["embedding"]
+        return self._embed(text, "RETRIEVAL_QUERY")
 
 
 class RAGService:
