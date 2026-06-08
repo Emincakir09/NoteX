@@ -3,50 +3,16 @@ import shutil
 import json
 import io
 import zipfile
-from typing import List
 from langchain_community.vectorstores import FAISS
+from langchain_community.embeddings import FastEmbedEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
-from langchain_core.embeddings import Embeddings
-import google.generativeai as genai
-
-
-class GeminiEmbeddings(Embeddings):
-    """google-generativeai SDK ile direkt Gemini embeddings (v1beta sorununu atlar)."""
-
-    def __init__(self, api_key: str = None, model: str = "gemini-embedding-001"):
-        self.api_key = api_key or os.getenv("GOOGLE_API_KEY", "")
-        self.model = model
-        self.base_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:embedContent"
-
-    def _embed(self, text: str, task_type: str = "RETRIEVAL_DOCUMENT") -> List[float]:
-        import urllib.request
-        payload = json.dumps({
-            "model": f"models/{self.model}",
-            "content": {"parts": [{"text": text}]},
-            "taskType": task_type
-        }).encode("utf-8")
-        req = urllib.request.Request(
-            f"{self.base_url}?key={self.api_key}",
-            data=payload,
-            headers={"Content-Type": "application/json"},
-            method="POST"
-        )
-        with urllib.request.urlopen(req) as resp:
-            data = json.loads(resp.read())
-        return data["embedding"]["values"]
-
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        return [self._embed(t, "RETRIEVAL_DOCUMENT") for t in texts]
-
-    def embed_query(self, text: str) -> List[float]:
-        return self._embed(text, "RETRIEVAL_QUERY")
 
 
 class RAGService:
     def __init__(self, persistence_path="./faiss_index", bucket=None):
         """
-        RAG Servisi - Gemini Embeddings + Firebase Storage Yedekleme
+        RAG Servisi - FastEmbed (ONNX, ~80MB RAM) + Firebase Storage Yedekleme
         """
         self.persistence_path = persistence_path
         self.registry_path = os.path.join(persistence_path, "registry.json")
@@ -58,12 +24,14 @@ class RAGService:
         path_key = os.path.basename(persistence_path)
         self.firebase_storage_path = f"faiss_indexes/{path_key}.zip"
 
-        # 1. Gemini Embedding Modeli Başlat
-        api_key = os.getenv("GOOGLE_API_KEY", "")
+        # 1. FastEmbed Modeli Başlat (ONNX tabanlı, hafif)
         try:
-            self.embedding_fn = GeminiEmbeddings(api_key=api_key)
+            self.embedding_fn = FastEmbedEmbeddings(
+                model_name="BAAI/bge-small-en-v1.5",
+                cache_dir="/tmp/fastembed_cache"
+            )
         except Exception as e:
-            print(f"Gemini embedding yükleme hatası: {e}")
+            print(f"FastEmbed yükleme hatası: {e}")
             self.embedding_fn = None
 
         # 2. Lokal dizin yoksa Firebase'den indir
@@ -82,9 +50,9 @@ class RAGService:
                     with open(self.registry_path, "r", encoding="utf-8") as f:
                         self.document_registry = json.load(f)
             except Exception as e:
-                print(f"FAISS index yükleme hatası: {e}")
-                self.vector_store = None
-                self.document_registry = {}
+                print(f"FAISS index yükleme hatası (sıfırlanıyor): {e}")
+                # Eski model ile kaydedilmiş index - temizle
+                self._reset_local_index()
 
         print(
             f"DEBUG: RAGService başlatıldı. "
@@ -133,6 +101,14 @@ class RAGService:
         except Exception as e:
             print(f"⚠️ Firebase'den indirme hatası: {e}")
 
+    def _reset_local_index(self):
+        """Bozuk / eski model index'ini temizler."""
+        self.vector_store = None
+        self.document_registry = {}
+        if os.path.exists(self.persistence_path):
+            shutil.rmtree(self.persistence_path, ignore_errors=True)
+        print("⚠️ FAISS index sıfırlandı (eski/bozuk index temizlendi).")
+
     # ------------------------------------------------------------------
     # Yardımcı
     # ------------------------------------------------------------------
@@ -163,7 +139,6 @@ class RAGService:
             if not chunks:
                 return False, "Metin parçalanamadı."
 
-            # Dosya zaten varsa önce sil (güncelleme mantığı)
             if source_name in self.document_registry:
                 self.delete_document(source_name)
 
@@ -185,8 +160,6 @@ class RAGService:
             self.document_registry[source_name] = ids
             self._save_registry()
             self.vector_store.save_local(self.persistence_path)
-
-            # Firebase'e yedekle
             self._upload_to_firebase()
 
             return True, f"{len(chunks)} parça başarıyla endekslendi."
@@ -251,10 +224,7 @@ class RAGService:
             del self.document_registry[source_name]
             self._save_registry()
             self.vector_store.save_local(self.persistence_path)
-
-            # Firebase'i güncelle
             self._upload_to_firebase()
-
             return True
         except Exception as e:
             print(f"Silme Hatası: {e}")
@@ -267,8 +237,6 @@ class RAGService:
             self.document_registry = {}
             if os.path.exists(self.persistence_path):
                 shutil.rmtree(self.persistence_path)
-
-            # Firebase'den de sil
             if self.bucket:
                 try:
                     blob = self.bucket.blob(self.firebase_storage_path)
@@ -276,7 +244,6 @@ class RAGService:
                         blob.delete()
                 except Exception:
                     pass
-
             return True
         except Exception as e:
             print(f"Temizleme Hatası: {e}")
