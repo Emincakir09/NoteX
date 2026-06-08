@@ -28,7 +28,7 @@ class RAGService:
         api_key = os.getenv("GOOGLE_API_KEY", "")
         try:
             self.embedding_fn = GoogleGenerativeAIEmbeddings(
-                model="models/embedding-001",
+                model="models/text-embedding-004",
                 google_api_key=api_key
             )
         except Exception as e:
