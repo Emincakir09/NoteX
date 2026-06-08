@@ -4,7 +4,7 @@ import json
 import io
 import zipfile
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import FastEmbedEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 
@@ -12,7 +12,7 @@ from langchain_core.documents import Document
 class RAGService:
     def __init__(self, persistence_path="./faiss_index", bucket=None):
         """
-        RAG Servisi - FastEmbed (ONNX, ~80MB RAM) + Firebase Storage Yedekleme
+        RAG Servisi - HuggingFace Embeddings + Firebase Storage Yedekleme
         """
         self.persistence_path = persistence_path
         self.registry_path = os.path.join(persistence_path, "registry.json")
@@ -24,14 +24,13 @@ class RAGService:
         path_key = os.path.basename(persistence_path)
         self.firebase_storage_path = f"faiss_indexes/{path_key}.zip"
 
-        # 1. FastEmbed Modeli Başlat (ONNX tabanlı, hafif)
+        # 1. HuggingFace Embedding Modeli Başlat
         try:
-            self.embedding_fn = FastEmbedEmbeddings(
-                model_name="BAAI/bge-small-en-v1.5",
-                cache_dir="/tmp/fastembed_cache"
+            self.embedding_fn = HuggingFaceEmbeddings(
+                model_name="all-MiniLM-L6-v2"
             )
         except Exception as e:
-            print(f"FastEmbed yükleme hatası: {e}")
+            print(f"Model yükleme hatası: {e}")
             self.embedding_fn = None
 
         # 2. Lokal dizin yoksa Firebase'den indir
@@ -51,7 +50,6 @@ class RAGService:
                         self.document_registry = json.load(f)
             except Exception as e:
                 print(f"FAISS index yükleme hatası (sıfırlanıyor): {e}")
-                # Eski model ile kaydedilmiş index - temizle
                 self._reset_local_index()
 
         print(
@@ -107,7 +105,7 @@ class RAGService:
         self.document_registry = {}
         if os.path.exists(self.persistence_path):
             shutil.rmtree(self.persistence_path, ignore_errors=True)
-        print("⚠️ FAISS index sıfırlandı (eski/bozuk index temizlendi).")
+        print("⚠️ FAISS index sıfırlandı.")
 
     # ------------------------------------------------------------------
     # Yardımcı
