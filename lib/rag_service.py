@@ -14,7 +14,7 @@ import google.generativeai as genai
 class GeminiEmbeddings(Embeddings):
     """google-generativeai SDK ile direkt Gemini embeddings (v1beta sorununu atlar)."""
 
-    def __init__(self, api_key: str = None, model: str = "text-embedding-004"):
+    def __init__(self, api_key: str = None, model: str = "gemini-embedding-001"):
         self.api_key = api_key or os.getenv("GOOGLE_API_KEY", "")
         self.model = model
         self.base_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:embedContent"
