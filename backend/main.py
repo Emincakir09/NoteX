@@ -185,9 +185,8 @@ def get_avatar(email: str):
 def get_rag_service(email: str):
     from lib.rag_service import RAGService
     parent = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    # RAG veritabanı Streamlit ile aynı konumda (chroma_db klasörü değil faiss_index)
     user_db_path = os.path.join(parent, "faiss_index", email.replace('@', '_').replace('.', '_'))
-    return RAGService(persistence_path=user_db_path)
+    return RAGService(persistence_path=user_db_path, bucket=bucket)
 
 SELECTED_MODEL = "gemini-flash-latest"  # Streamlit ile aynı model
 

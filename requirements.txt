@@ -7,7 +7,6 @@ langchain-community
 langchain-core
 langchain-google-genai
 langchain-text-splitters
-langchain-huggingface
 numpy
 # Firebase & Visuals
 firebase-admin
@@ -15,7 +14,6 @@ pyrebase4
 pyvis
 # RAG Core (FAISS)
 faiss-cpu
-sentence-transformers
 tiktoken
 pypdf
 fpdf2
