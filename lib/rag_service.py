@@ -17,7 +17,7 @@ class GeminiEmbeddings(Embeddings):
     def __init__(self, api_key: str = None, model: str = "text-embedding-004"):
         self.api_key = api_key or os.getenv("GOOGLE_API_KEY", "")
         self.model = model
-        self.base_url = f"https://generativelanguage.googleapis.com/v1/models/{model}:embedContent"
+        self.base_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:embedContent"
 
     def _embed(self, text: str, task_type: str = "RETRIEVAL_DOCUMENT") -> List[float]:
         import urllib.request
