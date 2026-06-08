@@ -3,10 +3,40 @@ import shutil
 import json
 import io
 import zipfile
+from typing import List
 from langchain_community.vectorstores import FAISS
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
+from langchain_core.embeddings import Embeddings
+import google.generativeai as genai
+
+
+class GeminiEmbeddings(Embeddings):
+    """google-generativeai SDK ile direkt Gemini embeddings (v1beta sorununu atlar)."""
+
+    def __init__(self, api_key: str = None, model: str = "models/text-embedding-004"):
+        effective_key = api_key or os.getenv("GOOGLE_API_KEY", "")
+        genai.configure(api_key=effective_key)
+        self.model = model
+
+    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+        embeddings = []
+        for text in texts:
+            result = genai.embed_content(
+                model=self.model,
+                content=text,
+                task_type="retrieval_document"
+            )
+            embeddings.append(result["embedding"])
+        return embeddings
+
+    def embed_query(self, text: str) -> List[float]:
+        result = genai.embed_content(
+            model=self.model,
+            content=text,
+            task_type="retrieval_query"
+        )
+        return result["embedding"]
 
 
 class RAGService:
@@ -27,10 +57,7 @@ class RAGService:
         # 1. Gemini Embedding Modeli Başlat
         api_key = os.getenv("GOOGLE_API_KEY", "")
         try:
-            self.embedding_fn = GoogleGenerativeAIEmbeddings(
-                model="models/text-embedding-004",
-                google_api_key=api_key
-            )
+            self.embedding_fn = GeminiEmbeddings(api_key=api_key)
         except Exception as e:
             print(f"Gemini embedding yükleme hatası: {e}")
             self.embedding_fn = None
