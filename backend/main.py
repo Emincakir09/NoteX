@@ -79,7 +79,12 @@ if not os.path.exists(cred_path) and os.path.exists(fallback_cred_path):
 
 if not firebase_admin._apps:
     try:
-        cred = credentials.Certificate(cred_path)
+        if os.getenv("FIREBASE_CREDENTIALS"):
+            cred_dict = json.loads(os.getenv("FIREBASE_CREDENTIALS"))
+            cred = credentials.Certificate(cred_dict)
+        else:
+            cred = credentials.Certificate(cred_path)
+        
         firebase_admin.initialize_app(cred, {
             'storageBucket': 'akademikagent.firebasestorage.app'
         })
