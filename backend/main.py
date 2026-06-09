@@ -243,22 +243,32 @@ def get_user_api_key(email: str) -> str:
 # ---------------------------------------------------------------
 def call_gemini_with_retry(prompt_text: str, max_retries: int = 3, api_key: str = None):
     """
-    Gemini API çağrısını exponential backoff ile tekrar dener.
+    Gemini API çağrısını LangChain ile thread-safe (kullanıcıya özel) yapar.
     api_key belirtilirse o key kullanılır, yoksa .env'deki global key kullanılır.
     429 hatalarında 5s → 10s → 20s bekler.
     """
-    import google.generativeai as _genai
+    from langchain_google_genai import ChatGoogleGenerativeAI
+    
     effective_key = api_key or os.getenv("GOOGLE_API_KEY", "")
     if not effective_key:
         raise HTTPException(status_code=400, detail="🔑 Gemini API key bulunamadı. Profil ayarlarından kendi API key'inizi ekleyin.")
-    _genai.configure(api_key=effective_key)
-    model = _genai.GenerativeModel(SELECTED_MODEL)
+    
+    model_name = SELECTED_MODEL if SELECTED_MODEL.startswith("gemini") else "gemini-1.5-flash"
+    llm = ChatGoogleGenerativeAI(
+        model=model_name,
+        google_api_key=effective_key,
+        temperature=0.7
+    )
+    
     last_error = None
     for attempt in range(max_retries):
         try:
-            response = model.generate_content(prompt_text)
-            return response.text
+            response = llm.invoke(prompt_text)
+            if response and response.content:
+                return response.content
+            return ""
         except Exception as e:
+            last_error = e
             error_str = str(e).lower()
             is_rate_limit = (
                 "429" in error_str
@@ -270,9 +280,7 @@ def call_gemini_with_retry(prompt_text: str, max_retries: int = 3, api_key: str 
                 wait_time = 5 * (2 ** attempt)  # 5s, 10s, 20s
                 print(f"⏳ Gemini 429 hatası, {wait_time}s bekleniyor... (deneme {attempt + 1}/{max_retries})")
                 time.sleep(wait_time)
-                last_error = e
             else:
-                last_error = e
                 break
     # Son hata kontrolü
     error_str = str(last_error).lower()
