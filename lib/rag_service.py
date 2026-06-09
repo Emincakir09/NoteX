@@ -4,7 +4,7 @@ import json
 import io
 import zipfile
 from langchain_community.vectorstores import FAISS
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 
@@ -12,7 +12,7 @@ from langchain_core.documents import Document
 class RAGService:
     def __init__(self, persistence_path="./faiss_index", bucket=None):
         """
-        RAG Servisi - Google Embeddings + Firebase Storage Yedekleme
+        RAG Servisi - HuggingFace Embeddings + Firebase Storage Yedekleme
         """
         self.persistence_path = persistence_path
         self.registry_path = os.path.join(persistence_path, "registry.json")
@@ -24,11 +24,10 @@ class RAGService:
         path_key = os.path.basename(persistence_path)
         self.firebase_storage_path = f"faiss_indexes/{path_key}.zip"
 
-        # 1. Google Embedding Modeli Başlat (PyTorch gerektirmez, RAM tasarrufu sağlar)
+        # 1. HuggingFace Embedding Modeli Başlat (Hızlı Yerel İşlem)
         try:
-            self.embedding_fn = GoogleGenerativeAIEmbeddings(
-                model="models/text-embedding-004",
-                google_api_key=os.environ.get("GOOGLE_API_KEY")
+            self.embedding_fn = HuggingFaceEmbeddings(
+                model_name="all-MiniLM-L6-v2"
             )
         except Exception as e:
             print(f"Model yükleme hatası: {e}")
