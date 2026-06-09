@@ -1279,6 +1279,22 @@ def get_discover_attempts(email: str):
         print(f"Error fetching attempts: {e}")
         return {"attempts": {}}
 
+@app.post("/api/user/{email}/discover_attempts")
+def save_discover_attempt(email: str, req: AttemptItem):
+    """Kullanıcının Keşfet sorusundaki şık seçimini Firebase'e kaydeder."""
+    if not db:
+        raise HTTPException(status_code=500, detail="DB Error")
+    try:
+        db.collection("users").document(email).collection("discover_attempts").document(req.questionId).set({
+            "questionId": req.questionId,
+            "selectedOption": req.selectedOption,
+            "isCorrect": req.isCorrect,
+            "timestamp": firestore.SERVER_TIMESTAMP
+        })
+        return {"success": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
         return {"success": True, "message": "Soru havuzdan silindi."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
