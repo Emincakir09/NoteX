@@ -17,6 +17,7 @@ sys.modules["urllib3.contrib.appengine"] = m
 # ==========================================
 
 import os
+from functools import lru_cache
 import sys
 import time
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Form
@@ -182,7 +183,9 @@ def get_avatar(email: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@lru_cache(maxsize=32)
 def get_rag_service(email: str):
+    """RAGService'i kullanıcı başına cache'ler — her istekte yeniden yüklenmez."""
     from lib.rag_service import RAGService
     parent = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     user_db_path = os.path.join(parent, "faiss_index", email.replace('@', '_').replace('.', '_'))
@@ -286,8 +289,51 @@ def call_gemini_with_retry(prompt_text: str, max_retries: int = 3, api_key: str 
 def chat_message(req: ChatRequest):
     try:
         rag = get_rag_service(req.email)
-        
-        # --- Streamlit'teki ask_gemini_rag ile birebir aynı mantık ---
+
+        # ---------------------------------------------------------------
+        # Özetleme / Genel Açıklama talebi tespiti
+        # Bu tür sorularda RAG chunk yeterli olmaz; tüm belge gerekir.
+        # ---------------------------------------------------------------
+        SUMMARY_KEYWORDS = [
+            "özetle", "özetler misin", "özet", "özetleyebilir misin",
+            "anlat", "anlatır mısın", "anlatsana", "anlayabilir miyim",
+            "neler var", "neler anlatıyor", "ne anlatıyor", "neler içeriyor",
+            "içerik", "içeriği", "genel olarak", "genel bakış",
+            "tüm belge", "belgede ne var", "konular neler",
+            "konu başlıkları", "başlıklar neler", "ana konular",
+            "hepsini", "bütününü", "hakkında bilgi ver",
+            "summarize", "summary", "overview", "what is in",
+            "what does", "explain the", "tell me about",
+        ]
+        prompt_lower = req.prompt.lower()
+        is_summary_request = any(kw in prompt_lower for kw in SUMMARY_KEYWORDS)
+
+        if is_summary_request:
+            # Tüm belgeyi al (quiz/kart özelliğiyle aynı mantık)
+            full_context = rag.get_full_text(req.selected_docs)
+            if not full_context or len(full_context.strip()) < 10:
+                return {"reply": "🔍 Seçili belgelerde özetlenecek içerik bulunamadı."}
+
+            prompt = f"""
+            Sen akademik bir asistansın. Aşağıdaki ders materyalini kapsamlı şekilde özetle.
+
+            MATERYAL:
+            {full_context[:120000]}
+
+            GÖREV: {req.prompt}
+
+            Lütfen:
+            - Kapsamlı ve anlaşılır bir özet sun
+            - Varsa ana konu başlıklarını listele
+            - Önemli kavramları vurgula
+            - Cevabı Türkçe ver, Markdown formatını kullan
+            """
+            bot_reply = call_gemini_with_retry(prompt, api_key=get_user_api_key(req.email))
+            return {"reply": bot_reply}
+
+        # ---------------------------------------------------------------
+        # Normal RAG sorgulama (belirli bir soruya cevap)
+        # ---------------------------------------------------------------
         docs = rag.query(req.prompt, n_results=5, selected_sources=req.selected_docs)
         if not docs:
             return {"reply": "🔍 Seçili belgelerde bu konuyla ilgili bilgi bulamadım."}
@@ -296,7 +342,7 @@ def chat_message(req: ChatRequest):
         context_text = "\n\n".join([
             f"[Kaynak: {d.metadata.get('source', '')}] {d.page_content}" for d in docs
         ])
-        
+
         prompt = f"""
         Sen akademik bir asistansın. Aşağıdaki bağlama dayanarak soruya cevap ver.
         
@@ -309,7 +355,7 @@ def chat_message(req: ChatRequest):
         Cevabın içinde hangi kaynaktan bilgi aldığını belirtmek için [Kaynak Adı] formatını kullan.
         """
         bot_reply = call_gemini_with_retry(prompt, api_key=get_user_api_key(req.email))
-        
+
         return {"reply": bot_reply}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -567,7 +613,7 @@ def generate_quiz(req: QuizRequest):
         Sorular metnin geneline yayılsın.
         
         MATERYAL:
-        {full_context[:300000]}
+        {full_context[:200000]}
         
         Çıktı SADECE ve SADECE JSON formatında olsun, başka hiçbir şey ekleme.
         Format: [ {{"soru": "...", "secenekler": ["A) ...", "B) ...", "C) ...", "D) ..."], "dogru_cevap": "A) ..."}} ]
@@ -902,26 +948,62 @@ def chat_message_with_save(req: ChatRequest):
             except Exception:
                 pass
 
-        # 3. RAG + Gemini cevap üret (aynı mantık)
-        rag = get_rag_service(req.email)
-        docs = rag.query(req.prompt, n_results=5, selected_sources=req.selected_docs)
+        # 3. RAG + Gemini cevap üret
+        SUMMARY_KEYWORDS = [
+            "özetle", "özetler misin", "özet", "özetleyebilir misin",
+            "anlat", "anlatır mısın", "anlatsana", "anlayabilir miyim",
+            "neler var", "neler anlatıyor", "ne anlatıyor", "neler içeriyor",
+            "içerik", "içeriği", "genel olarak", "genel bakış",
+            "tüm belge", "belgede ne var", "konular neler",
+            "konu başlıkları", "başlıklar neler", "ana konular",
+            "hepsini", "bütününü", "hakkında bilgi ver",
+            "summarize", "summary", "overview", "what is in",
+            "what does", "explain the", "tell me about",
+        ]
+        prompt_lower = req.prompt.lower()
+        is_summary_request = any(kw in prompt_lower for kw in SUMMARY_KEYWORDS)
 
-        if not docs:
-            bot_reply = "🔍 Seçili belgelerde bu konuyla ilgili bilgi bulamadım. Belge seçmeyi veya belge yüklemeyi deneyin."
+        rag = get_rag_service(req.email)
+        
+        if is_summary_request:
+            full_context = rag.get_full_text(req.selected_docs)
+            if not full_context or len(full_context.strip()) < 10:
+                bot_reply = "🔍 Seçili belgelerde özetlenecek içerik bulunamadı. Belge seçmeyi veya yüklemeyi deneyin."
+            else:
+                prompt_text = f"""
+                Sen akademik bir asistansın. Aşağıdaki ders materyalini kapsamlı şekilde özetle.
+
+                MATERYAL:
+                {full_context[:120000]}
+
+                GÖREV: {req.prompt}
+
+                Lütfen:
+                - Kapsamlı ve anlaşılır bir özet sun
+                - Varsa ana konu başlıklarını listele
+                - Önemli kavramları vurgula
+                - Cevabı Türkçe ver, Markdown formatını kullan
+                """
+                bot_reply = call_gemini_with_retry(prompt_text, api_key=get_user_api_key(req.email))
         else:
-            context_text = "\n\n".join([f"[Kaynak: {d.metadata.get('source', '')}] {d.page_content}" for d in docs])
-            prompt_text = f"""
-            Sen akademik bir asistansın. Aşağıdaki bağlama dayanarak soruya cevap ver.
-            
-            BAĞLAM (Veritabanından Bulunanlar):
-            {context_text}
-            
-            SORU: {req.prompt}
-            
-            Cevabı Türkçe ver. Markdown formatını kullan.
-            Cevabın içinde hangi kaynaktan bilgi aldığını belirtmek için [Kaynak Adı] formatını kullan.
-            """
-            bot_reply = call_gemini_with_retry(prompt_text, api_key=get_user_api_key(req.email))
+            docs = rag.query(req.prompt, n_results=5, selected_sources=req.selected_docs)
+
+            if not docs:
+                bot_reply = "🔍 Seçili belgelerde bu konuyla ilgili bilgi bulamadım. Belge seçmeyi veya belge yüklemeyi deneyin."
+            else:
+                context_text = "\n\n".join([f"[Kaynak: {d.metadata.get('source', '')}] {d.page_content}" for d in docs])
+                prompt_text = f"""
+                Sen akademik bir asistansın. Aşağıdaki bağlama dayanarak soruya cevap ver.
+                
+                BAĞLAM (Veritabanından Bulunanlar):
+                {context_text}
+                
+                SORU: {req.prompt}
+                
+                Cevabı Türkçe ver. Markdown formatını kullan.
+                Cevabın içinde hangi kaynaktan bilgi aldığını belirtmek için [Kaynak Adı] formatını kullan.
+                """
+                bot_reply = call_gemini_with_retry(prompt_text, api_key=get_user_api_key(req.email))
 
         # 4. Assistant cevabını kaydet
         if db and current_chat_id:

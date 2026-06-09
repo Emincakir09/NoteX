@@ -2,9 +2,12 @@ services:
   - type: web
     name: notex-backend
     runtime: python
+    region: frankfurt
+    plan: free
     rootDir: .
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
     envVars:
       - key: GOOGLE_API_KEY
         sync: false
