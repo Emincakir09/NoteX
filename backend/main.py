@@ -275,10 +275,13 @@ def call_gemini_with_retry(prompt_text: str, max_retries: int = 3, api_key: str 
                 or "resource_exhausted" in error_str
                 or "quota" in error_str
                 or "rate" in error_str
+                or "503" in error_str
+                or "unavailable" in error_str
+                or "high demand" in error_str
             )
             if is_rate_limit and attempt < max_retries - 1:
                 wait_time = 5 * (2 ** attempt)  # 5s, 10s, 20s
-                print(f"⏳ Gemini 429 hatası, {wait_time}s bekleniyor... (deneme {attempt + 1}/{max_retries})")
+                print(f"⏳ Gemini 429/503 hatası, {wait_time}s bekleniyor... (deneme {attempt + 1}/{max_retries})")
                 time.sleep(wait_time)
             else:
                 break
@@ -288,6 +291,10 @@ def call_gemini_with_retry(prompt_text: str, max_retries: int = 3, api_key: str 
         "429" in error_str
         or "resource_exhausted" in error_str
         or "quota" in error_str
+        or "rate" in error_str
+        or "503" in error_str
+        or "unavailable" in error_str
+        or "high demand" in error_str
     )
     if is_rate_limit:
         raise HTTPException(
